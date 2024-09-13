@@ -52,14 +52,12 @@ const csa_t csa_dft = {
         },
         
         .pid_pressure = {
-                .kp = 6.0f, .ki = 80.0f, .kd = 0.008f,
+                .kp = 12.0f, .ki = 80.0f, .kd = 0.008f,
                 .out_min = 0,
                 .out_max = 1023,
                 .period = 1.0f / 243,
                 .filter_len = 3
-        },
-        
-        .release_duration = 500
+        }
 };
 
 csa_t csa;
@@ -203,7 +201,6 @@ void csa_list_show(void)
     CSA_SHOW_SUB(0, pid_pressure, pid_f_t, out_max, "");
     d_info("\n"); debug_flush(true);
     
-    CSA_SHOW(0, release_duration, "");
     CSA_SHOW(0, set_pressure, "");
     CSA_SHOW(0, ori_pressure, "");
     CSA_SHOW(0, bias_pressure, "");

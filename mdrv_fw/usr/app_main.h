@@ -57,25 +57,23 @@ typedef struct {
 
     uint8_t         _reserved2[20];
     pid_f_t         pid_pressure;
-    uint8_t         _reserved3[20];
-    uint16_t        release_duration;
-    uint8_t         _reserved4[20];
+    uint8_t         _reserved3[42];
 
     // end of flash
-    #define         _end_save _reserved5
-    uint8_t         _reserved5[20];
+    #define         _end_save _reserved4
+    uint8_t         _reserved4[20];
     
     float           set_pressure;
-    uint8_t         _reserved6[20];
+    uint8_t         _reserved5[20];
     
     float           ori_pressure;
     float           bias_pressure;
-    uint8_t         _reserved7[12];
+    uint8_t         _reserved6[12];
     
     float           sen_pressure;       // kpa
     float           sen_temperature;    // c
     
-    uint8_t         _reserved8[32];
+    uint8_t         _reserved7[32];
     uint8_t         cur_valve;
     uint16_t        cur_pwm;
     uint32_t        loop_cnt;

@@ -123,12 +123,12 @@ static void dump_hw_status(void)
 #endif
 
 
-static void set_valve(uint8_t val)
+static void set_valve(bool v0, bool v1, bool v2)
 {
-    gpio_set_value(&valve0, val & 0x1);
-    gpio_set_value(&valve1, val & 0x2);
-    gpio_set_value(&valve2, val & 0x4);
-    csa.cur_valve = val;
+    gpio_set_value(&valve0, v0);
+    gpio_set_value(&valve1, v1);
+    gpio_set_value(&valve2, v2);
+    csa.cur_valve = v0 | (v1 << 1) | (v2 << 2);
 }
 
 static void set_pump(uint16_t val)
@@ -141,7 +141,6 @@ static void set_pump(uint16_t val)
 static void pump_routine(void)
 {
     static float set_pressure_bk = 0.0f;
-    static uint32_t t_valve_last = 0;
     bool has_change = fabsf(csa.set_pressure - set_pressure_bk) > 0.0001f;
     bool is_zero = fabsf(csa.set_pressure) <= 0.0001f;
     
@@ -150,18 +149,12 @@ static void pump_routine(void)
         if (is_zero) {
             d_debug("disable pump\n");
             set_pump(0);
-            set_valve(3); // open
-            t_valve_last = get_systick();
+            set_valve(false, false, false); // open
         } else if (csa.set_pressure > 0) {
-            set_valve(6); // blow
+            set_valve(true, false, true); // blow
         } else {
-            set_valve(0); // suck
+            set_valve(true, true, false); // suck
         }
-    }
-    
-    if (is_zero && csa.cur_valve != 0 && get_systick() - t_valve_last > csa.release_duration) {
-        d_debug("disable valve\n");
-        set_valve(0);
     }
     
     if (!is_zero) {
