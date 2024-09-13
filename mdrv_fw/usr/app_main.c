@@ -122,6 +122,65 @@ static void dump_hw_status(void)
 }
 #endif
 
+
+static void set_valve(uint8_t val)
+{
+    gpio_set_value(&valve0, val & 0x1);
+    gpio_set_value(&valve1, val & 0x2);
+    gpio_set_value(&valve2, val & 0x4);
+    csa.cur_valve = val;
+}
+
+static void set_pump(uint16_t val)
+{
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, clip(val, 0, 1023));
+    csa.cur_pwm = val;
+}
+
+
+static void pump_routine(void)
+{
+    static float set_pressure_bk = 0.0f;
+    static uint32_t t_valve_last = 0;
+    bool has_change = fabsf(csa.set_pressure - set_pressure_bk) > 0.0001f;
+    bool is_zero = fabsf(csa.set_pressure) <= 0.0001f;
+    
+    if (has_change) {
+        d_debug("has_change, is_zero: %d\n", is_zero);
+        if (is_zero) {
+            d_debug("disable pump\n");
+            set_pump(0);
+            set_valve(3); // open
+            t_valve_last = get_systick();
+        } else if (csa.set_pressure > 0) {
+            set_valve(6); // blow
+        } else {
+            set_valve(0); // suck
+        }
+    }
+    
+    if (is_zero && csa.cur_valve != 0 && get_systick() - t_valve_last > csa.release_duration) {
+        d_debug("disable valve\n");
+        set_valve(0);
+    }
+    
+    if (!is_zero) {
+        float pid_tgt = csa.set_pressure > 0 ? csa.set_pressure : -csa.set_pressure;
+        float pid_in = csa.set_pressure > 0 ? csa.sen_pressure : -csa.sen_pressure;
+
+        pid_f_set_target(&csa.pid_pressure, pid_tgt);
+        float pid_out = pid_f_compute(&csa.pid_pressure, pid_in);
+        set_pump(pid_out);
+    } else {
+        pid_f_reset(&csa.pid_pressure, 0, 0);
+        pid_f_set_target(&csa.pid_pressure, 0);
+    }
+    
+    set_pressure_bk = csa.set_pressure;
+    csa.loop_cnt++;
+}
+
+
 static void read_sensor(void)
 {
     uint8_t sen_state = 0;
@@ -134,20 +193,22 @@ static void read_sensor(void)
     
     int32_t tmp = (sen_buf[0] << 16) | (sen_buf[1] << 8) | sen_buf[2];
     if (tmp >= 0x800000)
-        csa.pressure = (float)(tmp - 0x1000000) / 0x800000 * 125 - 12.5f;
+        csa.sen_pressure = (float)(tmp - 0x1000000) / 0x800000 * 125 - 12.5f;
     else
-        csa.pressure = (float)tmp / 0x800000 * 125 - 12.5f;
+        csa.sen_pressure = (float)tmp / 0x800000 * 125 - 12.5f;
     
     tmp = (sen_buf[3] << 8) | sen_buf[4];
     if (tmp > 32768)
-        csa.temperature = (tmp - 65844) / 256.0f;
+        csa.sen_temperature = (tmp - 65844) / 256.0f;
     else
-        csa.temperature = (tmp - 308) / 256.0f;
+        csa.sen_temperature = (tmp - 308) / 256.0f;
     
+    pump_routine();
     
     //d_info("state: %02x, pressure: %d.%.3d, temperature: %d.%.3d\n",
     //        sen_state, P_3F(csa.pressure), P_3F(csa.temperature));
 }
+
 
 void app_main(void)
 {
@@ -172,7 +233,8 @@ void app_main(void)
     
     __HAL_TIM_ENABLE(&htim1);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-    i2c_mem_write(&sen_dev, 0x30, (void *) "\x1b", 1); // report freq: 62.5 ms
+    i2c_mem_write(&sen_dev, 0x30, (void *) "\x0b", 1);
+    pid_f_init(&csa.pid_pressure, true);
     
     while (true) {
         //if (get_systick() - t_last > (gpio_get_value(&led_g) ? 400 : 600)) {
@@ -181,17 +243,10 @@ void app_main(void)
         //}
         stack_check();
         //dump_hw_status();
-        //app_motor_routine();
         read_sensor();
         cdn_routine(&dft_ns); // handle cdnet
         common_service_routine();
         //raw_dbg_routine();
-        
-        
-        gpio_set_value(&valve0, csa.gpo_pins & 0x1);
-        gpio_set_value(&valve1, csa.gpo_pins & 0x2);
-        gpio_set_value(&valve2, csa.gpo_pins & 0x4);
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, clip(csa.pwm_val, 0, 1023));
         
         debug_flush(false);
     }

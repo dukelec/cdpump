@@ -10,7 +10,7 @@
 #include "app_main.h"
 
 regr_t csa_w_allow[] = {
-        { .offset = offsetof(csa_t, magic_code), .size = offsetof(csa_t, _reserved2) - offsetof(csa_t, magic_code) }
+        { .offset = offsetof(csa_t, magic_code), .size = offsetof(csa_t, _reserved6) - offsetof(csa_t, magic_code) }
 };
 
 csa_hook_t csa_w_hook[] = {
@@ -39,8 +39,17 @@ const csa_t csa_dft = {
         .bus_net = 0,
         .bus_cfg = CDCTL_CFG_DFT(0xfe),
         .dbg_en = false,
-        .dbg_dst = { .addr = {0x80, 0x00, 0x00}, .port = 9 }
+        .dbg_dst = { .addr = {0x80, 0x00, 0x00}, .port = 9 },
         
+        .pid_pressure = {
+                .kp = 6.0f, .ki = 80.0f, .kd = 0.008f,
+                .out_min = 0,
+                .out_max = 1023,
+                .period = 1.0f / 243,
+                .filter_len = 3
+        },
+        
+        .release_duration = 500
 };
 
 csa_t csa;
@@ -170,9 +179,23 @@ void csa_list_show(void)
     CSA_SHOW_SUB(1, dbg_dst, cdn_sockaddr_t, port, "Send debug message to this port");
     d_debug("\n"); debug_flush(true);
 
-    CSA_SHOW(0, gpo_pins, "");
-    CSA_SHOW(0, pwm_val, "");
-    CSA_SHOW(0, pressure, "kpa");
-    CSA_SHOW(0, temperature, "c");
+    CSA_SHOW_SUB(0, pid_pressure, pid_f_t, kp, "");
+    CSA_SHOW_SUB(0, pid_pressure, pid_f_t, ki, "");
+    CSA_SHOW_SUB(0, pid_pressure, pid_f_t, kd, "");
+    CSA_SHOW_SUB(0, pid_pressure, pid_f_t, out_min, "");
+    CSA_SHOW_SUB(0, pid_pressure, pid_f_t, out_max, "");
+    d_info("\n"); debug_flush(true);
+    
+    CSA_SHOW(0, release_duration, "");
+    CSA_SHOW(0, set_pressure, "");
+    CSA_SHOW(0, ori_pressure, "");
+    CSA_SHOW(0, bias_pressure, "");
+    d_info("\n"); debug_flush(true);
+    
+    CSA_SHOW(0, sen_pressure, "kpa");
+    CSA_SHOW(0, sen_temperature, "c");
+    CSA_SHOW(0, cur_valve, "");
+    CSA_SHOW(0, cur_pwm, "");
+    CSA_SHOW(0, loop_cnt, "");
     d_debug("\n"); debug_flush(true);
 }

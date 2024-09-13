@@ -14,7 +14,7 @@
 #include "cd_debug.h"
 #include "cdbus_uart.h"
 #include "cdctl_it.h"
-#include "pid_i.h"
+#include "pid_f.h"
 
 #define P_2F(x) (int)(x), abs(((x)-(int)(x))*100)  // "%d.%.2d"
 #define P_3F(x) (int)(x), abs(((x)-(int)(x))*1000) // "%d.%.3d"
@@ -49,18 +49,30 @@ typedef struct {
     cdn_sockaddr_t  dbg_dst;
     #define         _end_common _reserved1
 
-    uint8_t         _reserved1[10];
+    uint8_t         _reserved1[20];
+    pid_f_t         pid_pressure;
+    uint8_t         _reserved2[20];
+    uint16_t        release_duration;
+    uint8_t         _reserved3[20];
 
     // end of flash
-    #define         _end_save gpo_pins
-
-    uint8_t         gpo_pins;
-    uint16_t        pwm_val;
+    #define         _end_save _reserved3
+    uint8_t         _reserved4[20];
     
-    uint8_t         _reserved2[10];
+    float           set_pressure;
+    uint8_t         _reserved5[20];
     
-    float           pressure;       // kpa
-    float           temperature;    // c
+    float           ori_pressure;
+    float           bias_pressure;
+    uint8_t         _reserved6[12];
+    
+    float           sen_pressure;       // kpa
+    float           sen_temperature;    // c
+    
+    uint8_t         _reserved7[32];
+    uint8_t         cur_valve;
+    uint16_t        cur_pwm;
+    uint32_t        loop_cnt;
 
 } csa_t; // config status area
 
