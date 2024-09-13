@@ -177,6 +177,7 @@ static void pump_routine(void)
     }
     
     set_pressure_bk = csa.set_pressure;
+    raw_dbg(0);
     csa.loop_cnt++;
 }
 
@@ -220,7 +221,7 @@ void app_main(void)
     debug_init(&dft_ns, &csa.dbg_dst, &csa.dbg_en);
     device_init();
     common_service_init();
-    //raw_dbg_init();
+    raw_dbg_init();
     printf("conf (mdrv-step): %s\n", csa.conf_from ? "load from flash" : "use default");
     d_info("conf (mdrv-step): %s\n", csa.conf_from ? "load from flash" : "use default");
     d_info("\x1b[92mColor Test\x1b[0m and \x1b[93mAnother Color\x1b[0m...\n");
@@ -246,7 +247,7 @@ void app_main(void)
         read_sensor();
         cdn_routine(&dft_ns); // handle cdnet
         common_service_routine();
-        //raw_dbg_routine();
+        raw_dbg_routine();
         
         debug_flush(false);
     }

@@ -41,6 +41,16 @@ const csa_t csa_dft = {
         .dbg_en = false,
         .dbg_dst = { .addr = {0x80, 0x00, 0x00}, .port = 9 },
         
+        .dbg_raw_dst = { .addr = {0x80, 0x00, 0x00}, .port = 0xa },
+        .dbg_raw_msk = 0,
+        .dbg_raw_th = 200,
+        .dbg_raw = {
+                {
+                        { .offset = offsetof(csa_t, pid_pressure) + offsetof(pid_f_t, target), .size = 4 * 3 },
+                        { .offset = offsetof(csa_t, cur_pwm), .size = 2 }
+                }
+        },
+        
         .pid_pressure = {
                 .kp = 6.0f, .ki = 80.0f, .kd = 0.008f,
                 .out_min = 0,
@@ -178,6 +188,13 @@ void csa_list_show(void)
     CSA_SHOW_SUB(2, dbg_dst, cdn_sockaddr_t, addr, "Send debug message to this address");
     CSA_SHOW_SUB(1, dbg_dst, cdn_sockaddr_t, port, "Send debug message to this port");
     d_debug("\n"); debug_flush(true);
+
+    CSA_SHOW_SUB(2, dbg_raw_dst, cdn_sockaddr_t, addr, "Send raw debug data to this address");
+    CSA_SHOW_SUB(1, dbg_raw_dst, cdn_sockaddr_t, port, "Send raw debug data to this port");
+    CSA_SHOW(1, dbg_raw_msk, "Config which raw debug data to be send");
+    CSA_SHOW(0, dbg_raw_th, "Config raw debug data package size");
+    CSA_SHOW(1, dbg_raw[0], "Config raw debug for plot0");
+    d_info("\n"); debug_flush(true);
 
     CSA_SHOW_SUB(0, pid_pressure, pid_f_t, kp, "");
     CSA_SHOW_SUB(0, pid_pressure, pid_f_t, ki, "");

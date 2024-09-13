@@ -11,7 +11,7 @@
 
 static cdn_sock_t sock_raw_dbg = { .port = 0xa, .ns = &dft_ns, .tx_only = true }; // raw debug
 static list_head_t raw_pend = { 0 };
-static cdn_pkt_t *pkt_raw[2] = { NULL };
+static cdn_pkt_t *pkt_raw[1] = { NULL };
 
 
 void raw_dbg(int idx)

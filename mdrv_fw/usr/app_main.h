@@ -48,28 +48,34 @@ typedef struct {
     bool            dbg_en;
     cdn_sockaddr_t  dbg_dst;
     #define         _end_common _reserved1
-
     uint8_t         _reserved1[20];
-    pid_f_t         pid_pressure;
+    
+    cdn_sockaddr_t  dbg_raw_dst;
+    uint8_t         dbg_raw_msk;
+    uint8_t         dbg_raw_th;     // len threshold (+ 1 samples < pkt size)
+    regr_t          dbg_raw[1][6];
+
     uint8_t         _reserved2[20];
-    uint16_t        release_duration;
+    pid_f_t         pid_pressure;
     uint8_t         _reserved3[20];
+    uint16_t        release_duration;
+    uint8_t         _reserved4[20];
 
     // end of flash
-    #define         _end_save _reserved3
-    uint8_t         _reserved4[20];
+    #define         _end_save _reserved5
+    uint8_t         _reserved5[20];
     
     float           set_pressure;
-    uint8_t         _reserved5[20];
+    uint8_t         _reserved6[20];
     
     float           ori_pressure;
     float           bias_pressure;
-    uint8_t         _reserved6[12];
+    uint8_t         _reserved7[12];
     
     float           sen_pressure;       // kpa
     float           sen_temperature;    // c
     
-    uint8_t         _reserved7[32];
+    uint8_t         _reserved8[32];
     uint8_t         cur_valve;
     uint16_t        cur_pwm;
     uint32_t        loop_cnt;

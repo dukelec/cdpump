@@ -75,6 +75,7 @@ cdnet/utils/hex_dump.c \
 usr/config.c \
 usr/common_services.c \
 usr/pid_f.c \
+usr/raw_dbg.c \
 usr/app_main.c
 
 # ASM sources
