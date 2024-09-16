@@ -133,6 +133,8 @@ static void set_valve(bool v0, bool v1, bool v2)
 
 static void set_pump(uint16_t val)
 {
+    if (val - csa.cur_pwm > 800)
+        val = csa.cur_pwm + 800; // limit current during motor startup
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, clip(val, 0, 1023));
     csa.cur_pwm = val;
 }
