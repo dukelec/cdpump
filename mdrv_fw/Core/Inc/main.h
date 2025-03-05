@@ -73,7 +73,6 @@ void Error_Handler(void);
 #define LED_R_GPIO_Port GPIOD
 #define CD_INT_Pin GPIO_PIN_3
 #define CD_INT_GPIO_Port GPIOD
-#define CD_INT_EXTI_IRQn EXTI2_3_IRQn
 
 /* USER CODE BEGIN Private defines */
 

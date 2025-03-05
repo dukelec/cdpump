@@ -20,10 +20,11 @@
 #define P_3F(x) (int)(x), abs(((x)-(int)(x))*1000) // "%d.%.3d"
 
 
+#define BL_ARGS             0x20000000 // first word
 #define APP_CONF_ADDR       0x0801f800 // page 63, the last page
 #define APP_CONF_VER        0x0105
 
-#define FRAME_MAX           10
+#define FRAME_MAX           60
 #define PACKET_MAX          60
 
 #define LOOP_FREQ   (64000000 / 64 / 200) // 5 KHz
@@ -100,6 +101,8 @@ extern csa_hook_t csa_w_hook[];
 extern int csa_w_hook_num;
 extern csa_hook_t csa_r_hook[];
 extern int csa_r_hook_num;
+
+extern uint32_t end; // end of bss
 
 int flash_erase(uint32_t addr, uint32_t len);
 int flash_write(uint32_t addr, uint32_t len, const uint8_t *buf);
