@@ -173,7 +173,7 @@ void csa_list_show(void)
     CSA_SHOW(1, conf_from, "0: default config, 1: all from flash, 2: partly from flash");
     CSA_SHOW(0, do_reboot, "1: reboot to bl, 2: reboot to app");
     CSA_SHOW(0, save_conf, "Write 1 to save current config to flash");
-    d_debug("\n"); debug_flush(true);
+    d_debug("\n"); debug_flush(true); while (r_dev.tx_head.len) {}
 
     CSA_SHOW_SUB(1, bus_cfg, cdctl_cfg_t, mac, "RS-485 port id, range: 0~254");
     CSA_SHOW_SUB(0, bus_cfg, cdctl_cfg_t, baud_l, "RS-485 baud rate for first byte");
@@ -188,7 +188,7 @@ void csa_list_show(void)
     CSA_SHOW(0, dbg_en, "1: Report debug message to host, 0: do not report");
     CSA_SHOW_SUB(2, dbg_dst, cdn_sockaddr_t, addr, "Send debug message to this address");
     CSA_SHOW_SUB(1, dbg_dst, cdn_sockaddr_t, port, "Send debug message to this port");
-    d_debug("\n"); debug_flush(true);
+    d_debug("\n"); debug_flush(true); while (r_dev.tx_head.len) {}
 
     CSA_SHOW_SUB(2, dbg_raw_dst, cdn_sockaddr_t, addr, "Send raw debug data to this address");
     CSA_SHOW_SUB(1, dbg_raw_dst, cdn_sockaddr_t, port, "Send raw debug data to this port");
@@ -202,7 +202,7 @@ void csa_list_show(void)
     CSA_SHOW_SUB(0, pid_pressure, pid_f_t, kd, "");
     CSA_SHOW_SUB(0, pid_pressure, pid_f_t, out_min, "");
     CSA_SHOW_SUB(0, pid_pressure, pid_f_t, out_max, "");
-    d_info("\n"); debug_flush(true);
+    d_info("\n"); debug_flush(true); while (r_dev.tx_head.len) {}
     
     CSA_SHOW(0, set_pressure, "");
     CSA_SHOW(0, ori_pressure, "");
@@ -214,5 +214,5 @@ void csa_list_show(void)
     CSA_SHOW(0, cur_valve, "");
     CSA_SHOW(0, cur_pwm, "");
     CSA_SHOW(0, loop_cnt, "");
-    d_debug("\n"); debug_flush(true);
+    d_debug("\n"); debug_flush(true); while (r_dev.tx_head.len) {}
 }
