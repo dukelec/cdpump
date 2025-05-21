@@ -40,18 +40,17 @@ typedef struct {
     uint16_t        magic_code;     // 0xcdcd
     uint16_t        conf_ver;
     uint8_t         conf_from;      // 0: default, 1: all from flash, 2: partly from flash
-    bool            do_reboot;
+    uint8_t         do_reboot;
     bool            _reserved_bl;   // keep_in_bl for bl
     bool            save_conf;
 
     uint8_t         bus_net;
     cdctl_cfg_t     bus_cfg;
     bool            dbg_en;
-    cdn_sockaddr_t  dbg_dst;
+    uint8_t         _reserved0[6];
     #define         _end_common _reserved1
-    uint8_t         _reserved1[20];
-    
-    cdn_sockaddr_t  dbg_raw_dst;
+    uint8_t         _reserved1[26];
+
     uint8_t         dbg_raw_msk;
     uint8_t         dbg_raw_th;     // len threshold (+ 1 samples < pkt size)
     regr_t          dbg_raw[1][6];
@@ -121,8 +120,6 @@ uint8_t drv_mo_r_hook(uint16_t sub_offset, uint8_t len, uint8_t *dat);
 void app_motor_routine(void);
 void app_motor_init(void);
 void raw_dbg(int idx);
-void raw_dbg_init(void);
-void raw_dbg_routine(void);
 void limit_det_isr(void);
 
 extern gpio_t led_r;

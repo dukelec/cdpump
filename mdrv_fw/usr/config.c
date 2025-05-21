@@ -39,9 +39,6 @@ const csa_t csa_dft = {
         .bus_net = 0,
         .bus_cfg = CDCTL_CFG_DFT(0xfe),
         .dbg_en = false,
-        .dbg_dst = { .addr = {0x80, 0x00, 0x00}, .port = 9 },
-        
-        .dbg_raw_dst = { .addr = {0x80, 0x00, 0x00}, .port = 0xa },
         .dbg_raw_msk = 0,
         .dbg_raw_th = 200,
         .dbg_raw = {
@@ -116,7 +113,7 @@ int flash_erase(uint32_t addr, uint32_t len)
     if (ret == HAL_OK)
         ret = HAL_FLASHEx_Erase(&f, &err_sector);
     ret |= HAL_FLASH_Lock();
-    d_debug("nvm erase: %08x +%08x (%d %d), %08x, ret: %d\n", addr, len, f.Page, f.NbPages, err_sector, ret);
+    d_debug("nvm erase: %08lx +%08lx (%ld %ld), %08lx, ret: %d\n", addr, len, f.Page, f.NbPages, err_sector, ret);
     return ret;
 }
 
@@ -136,7 +133,7 @@ int flash_write(uint32_t addr, uint32_t len, const uint8_t *buf)
     }
     ret |= HAL_FLASH_Lock();
 
-    d_verbose("nvm write: %08x %d(%d), ret: %d\n", dst_dat, len, cnt, ret);
+    d_verbose("nvm write: %p %ld(%d), ret: %d\n", dst_dat, len, cnt, ret);
     return ret;
 }
 
@@ -166,14 +163,15 @@ int flash_write(uint32_t addr, uint32_t len, const uint8_t *buf)
 
 void csa_list_show(void)
 {
-    d_info("csa_list_show:\n\n"); debug_flush(true);
+    d_info("csa_list_show:\n\n");
+    while (frame_free_head.len < FRAME_MAX - 5);
 
     CSA_SHOW(1, magic_code, "Magic code: 0xcdcd");
     CSA_SHOW(1, conf_ver, "Config version");
-    CSA_SHOW(1, conf_from, "0: default config, 1: all from flash, 2: partly from flash");
+    CSA_SHOW(0, conf_from, "0: default config, 1: all from flash, 2: partly from flash");
     CSA_SHOW(0, do_reboot, "1: reboot to bl, 2: reboot to app");
     CSA_SHOW(0, save_conf, "Write 1 to save current config to flash");
-    d_debug("\n"); debug_flush(true); while (r_dev.tx_head.len) {}
+    d_debug("\n");
 
     CSA_SHOW_SUB(1, bus_cfg, cdctl_cfg_t, mac, "RS-485 port id, range: 0~254");
     CSA_SHOW_SUB(0, bus_cfg, cdctl_cfg_t, baud_l, "RS-485 baud rate for first byte");
@@ -183,36 +181,33 @@ void csa_list_show(void)
     CSA_SHOW_SUB(0, bus_cfg, cdctl_cfg_t, tx_permit_len, "Allow send wait time");
     CSA_SHOW_SUB(0, bus_cfg, cdctl_cfg_t, max_idle_len, "Max idle wait time for BS mode");
     CSA_SHOW_SUB(0, bus_cfg, cdctl_cfg_t, tx_pre_len, " Active TX_EN before TX");
-    d_debug("\n"); debug_flush(true);
+    d_debug("\n");
 
     CSA_SHOW(0, dbg_en, "1: Report debug message to host, 0: do not report");
-    CSA_SHOW_SUB(2, dbg_dst, cdn_sockaddr_t, addr, "Send debug message to this address");
-    CSA_SHOW_SUB(1, dbg_dst, cdn_sockaddr_t, port, "Send debug message to this port");
-    d_debug("\n"); debug_flush(true); while (r_dev.tx_head.len) {}
+    d_info("\n");
 
-    CSA_SHOW_SUB(2, dbg_raw_dst, cdn_sockaddr_t, addr, "Send raw debug data to this address");
-    CSA_SHOW_SUB(1, dbg_raw_dst, cdn_sockaddr_t, port, "Send raw debug data to this port");
     CSA_SHOW(1, dbg_raw_msk, "Config which raw debug data to be send");
     CSA_SHOW(0, dbg_raw_th, "Config raw debug data package size");
     CSA_SHOW(1, dbg_raw[0], "Config raw debug for plot0");
-    d_info("\n"); debug_flush(true);
+    d_info("\n");
 
     CSA_SHOW_SUB(0, pid_pressure, pid_f_t, kp, "");
     CSA_SHOW_SUB(0, pid_pressure, pid_f_t, ki, "");
     CSA_SHOW_SUB(0, pid_pressure, pid_f_t, kd, "");
     CSA_SHOW_SUB(0, pid_pressure, pid_f_t, out_min, "");
     CSA_SHOW_SUB(0, pid_pressure, pid_f_t, out_max, "");
-    d_info("\n"); debug_flush(true); while (r_dev.tx_head.len) {}
+    d_info("\n");
     
     CSA_SHOW(0, set_pressure, "");
     CSA_SHOW(0, ori_pressure, "");
     CSA_SHOW(0, bias_pressure, "");
-    d_info("\n"); debug_flush(true);
+    d_info("\n");
     
     CSA_SHOW(0, sen_pressure, "kpa");
     CSA_SHOW(0, sen_temperature, "c");
     CSA_SHOW(0, cur_valve, "");
     CSA_SHOW(0, cur_pwm, "");
     CSA_SHOW(0, loop_cnt, "");
-    d_debug("\n"); debug_flush(true); while (r_dev.tx_head.len) {}
+    d_debug("\n");
+    while (frame_free_head.len < FRAME_MAX - 5);
 }
