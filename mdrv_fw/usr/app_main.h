@@ -52,7 +52,7 @@ typedef struct {
     uint8_t         _reserved1[26];
 
     uint8_t         dbg_raw_msk;
-    uint8_t         dbg_raw_th;     // len threshold (+ 1 samples < pkt size)
+    uint8_t         _reserved12;
     regr_t          dbg_raw[1][6];
 
     uint8_t         _reserved2[20];
