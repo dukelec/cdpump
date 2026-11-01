@@ -53,9 +53,9 @@ static void device_init(void)
         cdn_list_put(&packet_free_head, &packet_alloc[i]);
 
     spi_wr_init(&r_spi);
-    cdctl_dev_init(&r_dev, &frame_free_head, &csa.bus_cfg, &r_spi, &r_int, EXTI2_3_IRQn);
+    cdctl_dev_init(&r_dev, &frame_free_head, &csa.bus_cfg, &r_spi, &r_int);
 
-    cdn_add_intf(&dft_ns, &r_dev.cd_dev, csa.bus_net, csa.bus_cfg.mac);
+    cdn_add_intf(&dft_ns, &r_dev.cd_dev, 0, csa.bus_cfg.mac);
 }
 
 
@@ -177,7 +177,7 @@ void app_main(void)
     HAL_NVIC_SetPriority(TIM1_BRK_UP_TRG_COM_IRQn, 1, 0);
 
     device_init();
-    common_service_init();
+    comm_service_init();
     d_info("conf (cdpump): %s\n", csa.conf_from ? "load from flash" : "use default");
 
     HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
@@ -201,8 +201,8 @@ void app_main(void)
         //}
         //dump_hw_status();
         read_sensor();
-        cdn_routine(&dft_ns); // handle cdnet
-        common_service_routine();
+        cdn_poll(&dft_ns); // handle cdnet
+        comm_service_poll();
 
         if (*stack_check != 0xababcdcd12123434) {
             printf("stack overflow\n");

@@ -14,7 +14,7 @@
 # target
 ######################################
 TARGET = mdrv_bl
-GIT_VERSION_FULL := $(shell git describe --dirty --always --tags)
+GIT_VERSION_FULL := $(shell git describe --long --dirty --always --tags)
 # tag format: any_string_vX.Y
 VERSION_MID := $(shell echo $(GIT_VERSION_FULL) | sed -E 's/.*v//' | sed -E 's/-g.*//')
 GIT_VERSION := $(shell \
@@ -82,7 +82,7 @@ cdnet/dev/cdctl_pll_cal.c \
 cdnet/dev/cdctl.c \
 cdnet/utils/cd_list.c \
 usr/config.c \
-usr/common_services.c \
+usr/comm_service.c \
 usr/app_main.c
 
 # ASM sources
